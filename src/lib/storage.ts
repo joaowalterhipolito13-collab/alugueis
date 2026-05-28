@@ -83,7 +83,7 @@ export const contratosDB = {
     }))
   },
   get: (id: string) => contratosDB.list().find(c => c.id === id),
-  create: (data: Omit<Contrato, 'id' | 'criado_em' | 'inquilino' | 'imovel'>): Contrato => {
+  create: (data: Omit<Contrato, 'id' | 'criado_em' | 'inquilino' | 'imovel'> & { banco?: string }): Contrato => {
     const all = get<Contrato>(KEYS.contratos)
     const novo = { ...data, id: uuid(), criado_em: new Date().toISOString() } as Contrato
     set(KEYS.contratos, [...all, novo])
@@ -133,6 +133,36 @@ export const pagamentosDB = {
   delete: (id: string) => {
     set(KEYS.pagamentos, get<Pagamento>(KEYS.pagamentos).filter(p => p.id !== id))
   },
+}
+
+// Gera cobranças mensais automaticamente para todos os contratos ativos
+export function gerarCobrancasAutomaticas() {
+  const hoje = new Date()
+  const mes = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`
+  const contratos = get<Contrato>(KEYS.contratos).filter(c => c.status === 'ativo')
+  const pagamentosExistentes = get<Pagamento>(KEYS.pagamentos)
+    .filter(p => p.mes_referencia === mes)
+    .map(p => p.contrato_id)
+
+  for (const c of contratos) {
+    if (pagamentosExistentes.includes(c.id)) continue
+    const [ano, m] = mes.split('-').map(Number)
+    const dia = c.dia_vencimento ?? 10
+    const vencimento = `${ano}-${String(m).padStart(2, '0')}-${String(dia).padStart(2, '0')}`
+    const nova: Pagamento = {
+      id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2),
+      contrato_id: c.id,
+      mes_referencia: mes,
+      valor: c.valor_mensal,
+      data_vencimento: vencimento,
+      data_pagamento: null,
+      status: 'pendente',
+      observacoes: '',
+      criado_em: new Date().toISOString(),
+    }
+    const todas = get<Pagamento>(KEYS.pagamentos)
+    set(KEYS.pagamentos, [...todas, nova])
+  }
 }
 
 export function exportarDados() {

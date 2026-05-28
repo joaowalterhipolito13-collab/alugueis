@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { calcularAlertas, solicitarPermissaoNotificacao, dispararNotificacoes, deveNotificarHoje, marcarNotificadoHoje } from './lib/notificacoes'
+import { gerarCobrancasAutomaticas } from './lib/storage'
 import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
 import Inquilinos from './pages/Inquilinos'
@@ -11,6 +12,10 @@ import Relatorios from './pages/Relatorios'
 import Terrenos from './pages/Terrenos'
 
 export default function App() {
+  useEffect(() => {
+    gerarCobrancasAutomaticas()
+  }, [])
+
   useEffect(() => {
     if (!deveNotificarHoje()) return
     const alertas = calcularAlertas(5)

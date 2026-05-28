@@ -42,6 +42,7 @@ export interface Contrato {
   dia_vencimento: number
   indice_reajuste: 'IGPM' | 'IPCA' | 'INPC' | 'fixo'
   status: 'ativo' | 'encerrado' | 'rescindido'
+  banco: string
   observacoes: string
   criado_em: string
   inquilino?: Inquilino

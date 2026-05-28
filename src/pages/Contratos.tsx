@@ -8,7 +8,7 @@ import type { Contrato } from '../lib/supabase'
 const EMPTY = {
   inquilino_id: '', imovel_id: '', data_inicio: '', data_fim: '',
   valor_mensal: 0, dia_vencimento: 10, indice_reajuste: 'IGPM' as const,
-  status: 'ativo' as const, observacoes: '',
+  status: 'ativo' as const, banco: '', observacoes: '',
 }
 
 const STATUS_COLOR: Record<string, 'green' | 'gray' | 'red'> = {
